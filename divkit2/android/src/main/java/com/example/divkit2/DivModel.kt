@@ -122,6 +122,14 @@ sealed class DivComponent {
     ) : DivComponent()
 
     @Serializable
+    @SerialName("input")
+    data class Input(
+        @SerialName("hint") val hint: String = "",
+        @SerialName("variable") val variable: String,
+        override val style: DivStyle = DivStyle()
+    ) : DivComponent()
+
+    @Serializable
     @SerialName("image")
     data class Image(
         val url: String,

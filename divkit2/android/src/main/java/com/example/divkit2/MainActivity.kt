@@ -8,13 +8,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -28,6 +27,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     val divData = remember { mutableStateOf<DivComponent?>(null) }
+                    val divContext = remember { DivContext() }
 
                     // Simulate loading large/complex JSON
                     LaunchedEffect(Unit) {
@@ -47,13 +47,10 @@ class MainActivity : ComponentActivity() {
                                       "style": { "margin": 8 }
                                     },
                                     {
-                                      "type": "image",
-                                      "url": "https://example.com/logo.png",
-                                      "style": {
-                                        "width": 100,
-                                        "height": 100,
-                                        "background": "#FFEEEEEE"
-                                      }
+                                      "type": "input",
+                                      "hint": "Enter your name",
+                                      "variable": "user_name",
+                                      "style": { "margin": 8, "width": -1 }
                                     },
                                     {
                                       "type": "container",
@@ -62,14 +59,8 @@ class MainActivity : ComponentActivity() {
                                       "items": [
                                         {
                                           "type": "button",
-                                          "text": "Cancel",
-                                          "background_color": "#FFE0E0E0",
-                                          "text_color": "#FF000000",
-                                          "style": { "margin": 4 }
-                                        },
-                                        {
-                                          "type": "button",
-                                          "text": "Confirm",
+                                          "text": "Submit Form",
+                                          "action": { "log_id": "submit_form", "url": "https://example.com/api/submit" },
                                           "background_color": "#FF2196F3",
                                           "text_color": "#FFFFFFFF",
                                           "style": { "margin": 4 }
@@ -95,7 +86,9 @@ class MainActivity : ComponentActivity() {
                             CircularProgressIndicator()
                         }
                     } else {
-                        DivRenderer(component = divData.value!!)
+                        CompositionLocalProvider(LocalDivContext provides divContext) {
+                            DivRenderer(component = divData.value!!)
+                        }
                     }
                 }
             }

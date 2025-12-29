@@ -103,6 +103,7 @@ enum DivComponent: Identifiable, Codable {
     var id: UUID {
         switch self {
         case .text(let id, _, _, _, _, _): return id
+        case .input(let id, _, _, _): return id
         case .image(let id, _, _, _): return id
         case .button(let id, _, _, _, _, _): return id
         case .container(let id, _, _, _, _): return id
@@ -111,6 +112,7 @@ enum DivComponent: Identifiable, Codable {
     }
 
     case text(id: UUID = UUID(), content: String, fontSize: CGFloat, color: Color, fontWeight: Font.Weight, style: DivStyle)
+    case input(id: UUID = UUID(), hint: String, variable: String, style: DivStyle)
     case image(id: UUID = UUID(), url: URL?, contentScale: ContentMode, style: DivStyle)
     case button(id: UUID = UUID(), text: String, action: DivAction, backgroundColor: Color, textColor: Color, style: DivStyle)
     case container(id: UUID = UUID(), items: [DivComponent], orientation: DivOrientation, alignment: Alignment, style: DivStyle)
@@ -120,6 +122,8 @@ enum DivComponent: Identifiable, Codable {
         case type, style
         // Text
         case text, fontSize = "font_size", textColor = "text_color", fontWeight = "font_weight"
+        // Input
+        case hint, variable
         // Image
         case url, scale
         // Button
@@ -147,6 +151,11 @@ enum DivComponent: Identifiable, Codable {
             let weight: Font.Weight = weightStr == "bold" ? .bold : .regular
 
             self = .text(id: id, content: content, fontSize: size, color: color, fontWeight: weight, style: style)
+
+        case "input":
+            let hint = try container.decodeIfPresent(String.self, forKey: .hint) ?? ""
+            let variable = try container.decode(String.self, forKey: .variable)
+            self = .input(id: id, hint: hint, variable: variable, style: style)
 
         case "image":
             let urlStr = try container.decodeIfPresent(String.self, forKey: .url)

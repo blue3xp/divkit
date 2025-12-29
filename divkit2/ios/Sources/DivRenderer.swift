@@ -8,6 +8,9 @@ struct DivRenderer: View {
         case .text(_, let content, let fontSize, let color, let fontWeight, let style):
             DivTextView(content: content, fontSize: fontSize, color: color, fontWeight: fontWeight, style: style)
 
+        case .input(_, let hint, let variable, let style):
+            DivInputView(hint: hint, variable: variable, style: style)
+
         case .image(_, let url, let contentScale, let style):
             DivImageView(url: url, contentScale: contentScale, style: style)
 

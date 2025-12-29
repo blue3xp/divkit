@@ -3,6 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @State private var divData: DivComponent? = nil
     @State private var isLoading = true
+    @StateObject private var divContext = DivContext()
 
     var body: some View {
         Group {
@@ -12,6 +13,7 @@ struct ContentView: View {
                 ScrollView {
                     DivRenderer(component: data)
                 }
+                .environmentObject(divContext) // Inject context
             } else {
                 Text("Failed to load data")
             }
@@ -22,7 +24,7 @@ struct ContentView: View {
     }
 
     private func loadJson() async {
-        // Simulate complex JSON string
+        // Simulate complex JSON string with FORM data
         let complexJson = """
         {
           "type": "container",
@@ -37,13 +39,10 @@ struct ContentView: View {
               "style": { "margin": 8 }
             },
             {
-              "type": "image",
-              "url": "https://example.com/logo.png",
-              "style": {
-                "width": 100,
-                "height": 100,
-                "background": "#FFEEEEEE"
-              }
+              "type": "input",
+              "hint": "Enter your name (iOS)",
+              "variable": "user_name",
+              "style": { "margin": 8, "width": -1 }
             },
             {
               "type": "container",
@@ -52,14 +51,8 @@ struct ContentView: View {
               "items": [
                 {
                   "type": "button",
-                  "text": "Cancel",
-                  "background_color": "#FFE0E0E0",
-                  "text_color": "#FF000000",
-                  "style": { "margin": 4 }
-                },
-                {
-                  "type": "button",
-                  "text": "Confirm",
+                  "text": "Submit Form",
+                  "action": { "log_id": "submit_form", "url": "https://example.com/api/submit" },
                   "background_color": "#FF2196F3",
                   "text_color": "#FFFFFFFF",
                   "style": { "margin": 4 }
