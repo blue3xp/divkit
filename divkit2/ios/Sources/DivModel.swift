@@ -57,9 +57,13 @@ struct DivStyle: Codable {
     var margin: CGFloat = 0
     var border: DivBorder? = nil
     var action: DivAction? = nil
+    var columnSpan: Int? = nil
+    var rowSpan: Int? = nil
 
     enum CodingKeys: String, CodingKey {
         case width, height, background, padding, margin, border, action
+        case columnSpan = "column_span"
+        case rowSpan = "row_span"
     }
 
     init(from decoder: Decoder) throws {
@@ -70,6 +74,8 @@ struct DivStyle: Codable {
         margin = try container.decodeIfPresent(CGFloat.self, forKey: .margin) ?? 0
         border = try container.decodeIfPresent(DivBorder.self, forKey: .border)
         action = try container.decodeIfPresent(DivAction.self, forKey: .action)
+        columnSpan = try container.decodeIfPresent(Int.self, forKey: .columnSpan)
+        rowSpan = try container.decodeIfPresent(Int.self, forKey: .rowSpan)
 
         if let bgHex = try container.decodeIfPresent(String.self, forKey: .background) {
             self.background = Color(hex: bgHex)
@@ -77,7 +83,7 @@ struct DivStyle: Codable {
     }
 
     // Default init for manual creation if needed
-    init(width: CGFloat? = nil, height: CGFloat? = nil, background: Color? = nil, padding: CGFloat = 0, margin: CGFloat = 0, border: DivBorder? = nil, action: DivAction? = nil) {
+    init(width: CGFloat? = nil, height: CGFloat? = nil, background: Color? = nil, padding: CGFloat = 0, margin: CGFloat = 0, border: DivBorder? = nil, action: DivAction? = nil, columnSpan: Int? = nil, rowSpan: Int? = nil) {
         self.width = width
         self.height = height
         self.background = background
@@ -85,18 +91,30 @@ struct DivStyle: Codable {
         self.margin = margin
         self.border = border
         self.action = action
+        self.columnSpan = columnSpan
+        self.rowSpan = rowSpan
     }
 }
 
 // --- Component Hierarchy ---
 
 enum DivComponent: Identifiable, Codable {
-    var id: UUID { UUID() }
+    // Computed property to access the stable ID stored in the cases
+    var id: UUID {
+        switch self {
+        case .text(let id, _, _, _, _, _): return id
+        case .image(let id, _, _, _): return id
+        case .button(let id, _, _, _, _, _): return id
+        case .container(let id, _, _, _, _): return id
+        case .grid(let id, _, _, _): return id
+        }
+    }
 
-    case text(content: String, fontSize: CGFloat, color: Color, fontWeight: Font.Weight, style: DivStyle)
-    case image(url: URL?, contentScale: ContentMode, style: DivStyle)
-    case button(text: String, action: DivAction, backgroundColor: Color, textColor: Color, style: DivStyle)
-    case container(items: [DivComponent], orientation: DivOrientation, alignment: Alignment, style: DivStyle)
+    case text(id: UUID = UUID(), content: String, fontSize: CGFloat, color: Color, fontWeight: Font.Weight, style: DivStyle)
+    case image(id: UUID = UUID(), url: URL?, contentScale: ContentMode, style: DivStyle)
+    case button(id: UUID = UUID(), text: String, action: DivAction, backgroundColor: Color, textColor: Color, style: DivStyle)
+    case container(id: UUID = UUID(), items: [DivComponent], orientation: DivOrientation, alignment: Alignment, style: DivStyle)
+    case grid(id: UUID = UUID(), items: [DivComponent], columnCount: Int, style: DivStyle)
 
     enum CodingKeys: String, CodingKey {
         case type, style
@@ -108,12 +126,15 @@ enum DivComponent: Identifiable, Codable {
         case action, backgroundColor = "background_color"
         // Container
         case items, orientation, alignmentHorizontal = "alignment_horizontal", alignmentVertical = "alignment_vertical"
+        // Grid
+        case columnCount = "column_count"
     }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let type = try container.decode(String.self, forKey: .type)
         let style = try container.decodeIfPresent(DivStyle.self, forKey: .style) ?? DivStyle()
+        let id = UUID() // Generate stable ID once upon decoding
 
         switch type {
         case "text":
@@ -125,7 +146,7 @@ enum DivComponent: Identifiable, Codable {
             let color = colorHex != nil ? Color(hex: colorHex!) : .black
             let weight: Font.Weight = weightStr == "bold" ? .bold : .regular
 
-            self = .text(content: content, fontSize: size, color: color, fontWeight: weight, style: style)
+            self = .text(id: id, content: content, fontSize: size, color: color, fontWeight: weight, style: style)
 
         case "image":
             let urlStr = try container.decodeIfPresent(String.self, forKey: .url)
@@ -134,7 +155,7 @@ enum DivComponent: Identifiable, Codable {
             let url = urlStr != nil ? URL(string: urlStr!) : nil
             let scale: ContentMode = scaleStr == "fill" ? .fill : .fit
 
-            self = .image(url: url, contentScale: scale, style: style)
+            self = .image(id: id, url: url, contentScale: scale, style: style)
 
         case "button":
             let text = try container.decodeIfPresent(String.self, forKey: .text) ?? "Button"
@@ -145,7 +166,7 @@ enum DivComponent: Identifiable, Codable {
             let bg = bgHex != nil ? Color(hex: bgHex!) : .blue
             let txt = txtHex != nil ? Color(hex: txtHex!) : .white
 
-            self = .button(text: text, action: action, backgroundColor: bg, textColor: txt, style: style)
+            self = .button(id: id, text: text, action: action, backgroundColor: bg, textColor: txt, style: style)
 
         case "container":
             let items = try container.decode([DivComponent].self, forKey: .items)
@@ -157,16 +178,21 @@ enum DivComponent: Identifiable, Codable {
 
             let alignment: Alignment = Self.mapAlignment(h: hAlign, v: vAlign)
 
-            self = .container(items: items, orientation: orientation, alignment: alignment, style: style)
+            self = .container(id: id, items: items, orientation: orientation, alignment: alignment, style: style)
+
+        case "grid":
+            let items = try container.decode([DivComponent].self, forKey: .items)
+            let columnCount = try container.decodeIfPresent(Int.self, forKey: .columnCount) ?? 2
+            self = .grid(id: id, items: items, columnCount: columnCount, style: style)
 
         default:
             // Fallback for unknown types
-            self = .text(content: "Unknown type: \(type)", fontSize: 14, color: .red, fontWeight: .regular, style: style)
+            self = .text(id: id, content: "Unknown type: \(type)", fontSize: 14, color: .red, fontWeight: .regular, style: style)
         }
     }
 
     func encode(to encoder: Encoder) throws {
-        // Encoding logic not strictly required for this task but good practice
+        // Encoding logic not required for this task
     }
 
     static func mapAlignment(h: DivAlignment, v: DivAlignment) -> Alignment {

@@ -21,15 +21,26 @@ struct DivImageView: View {
     let style: DivStyle
 
     var body: some View {
-        // Placeholder implementation
-        // Real implementation would use AsyncImage
-        Rectangle()
-            .fill(Color.gray.opacity(0.3))
-            .overlay(
-                Text("Image")
-                    .foregroundColor(.gray)
-            )
+        if let url = url {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .empty:
+                    Color.gray.opacity(0.3)
+                case .success(let image):
+                    image.resizable()
+                        .aspectRatio(contentMode: contentScale)
+                case .failure:
+                    Color.red.opacity(0.3) // Error state
+                @unknown default:
+                    Color.gray.opacity(0.3)
+                }
+            }
             .applyDivStyle(style)
+        } else {
+            Rectangle()
+                .fill(Color.gray.opacity(0.3))
+                .applyDivStyle(style)
+        }
     }
 }
 
@@ -89,7 +100,8 @@ struct DivContainerView: View {
 
             case .scrollVertical:
                 ScrollView(.vertical) {
-                    VStack(alignment: alignment.horizontal) {
+                    // Use LazyVStack for performance on large lists
+                    LazyVStack(alignment: alignment.horizontal) {
                         ForEach(items) { item in
                             DivRenderer(component: item)
                         }
@@ -98,12 +110,33 @@ struct DivContainerView: View {
 
             case .scrollHorizontal:
                 ScrollView(.horizontal) {
-                    HStack(alignment: alignment.vertical) {
+                    // Use LazyHStack for performance on large lists
+                    LazyHStack(alignment: alignment.vertical) {
                         ForEach(items) { item in
                             DivRenderer(component: item)
                         }
                     }
                 }
+            }
+        }
+        .applyDivStyle(style)
+    }
+}
+
+struct DivGridView: View {
+    let items: [DivComponent]
+    let columnCount: Int
+    let style: DivStyle
+
+    var body: some View {
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: columnCount)
+
+        LazyVGrid(columns: columns, spacing: 0) {
+            ForEach(items) { item in
+                DivRenderer(component: item)
+                    // Note: LazyVGrid in SwiftUI doesn't support 'span' natively like Compose
+                    // without breaking the flow into custom grids.
+                    // For this PoC, we ignore columnSpan and render as standard flow cells.
             }
         }
         .applyDivStyle(style)

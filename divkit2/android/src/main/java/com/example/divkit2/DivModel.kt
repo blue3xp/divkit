@@ -99,7 +99,9 @@ data class DivStyle(
     @Serializable(with = DpSerializer::class) val margin: Dp = 0.dp,
     val border: DivBorder? = null,
     val action: DivAction? = null,
-    val weight: Float? = null
+    val weight: Float? = null,
+    @SerialName("column_span") val columnSpan: Int? = null,
+    @SerialName("row_span") val rowSpan: Int? = null
 )
 
 // --- Component Hierarchy ---
@@ -145,6 +147,14 @@ sealed class DivComponent {
         val orientation: Orientation = Orientation.VERTICAL,
         @SerialName("alignment_horizontal") val contentAlignmentHorizontal: Alignment = Alignment.START,
         @SerialName("alignment_vertical") val contentAlignmentVertical: Alignment = Alignment.TOP,
+        override val style: DivStyle = DivStyle()
+    ) : DivComponent()
+
+    @Serializable
+    @SerialName("grid")
+    data class Grid(
+        val items: List<DivComponent>,
+        @SerialName("column_count") val columnCount: Int = 2,
         override val style: DivStyle = DivStyle()
     ) : DivComponent()
 }
