@@ -1,13 +1,13 @@
 package com.example.divkit2
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
@@ -43,9 +43,8 @@ fun RenderText(data: DivComponent.Text) {
 
 @Composable
 fun RenderImage(data: DivComponent.Image) {
-    // In a real app, use Coil or Glide. Here we use a placeholder.
     Image(
-        painter = ColorPainter(Color.LightGray), // Placeholder
+        painter = ColorPainter(Color.LightGray),
         contentDescription = data.contentDescription,
         contentScale = when (data.contentScale) {
             "crop" -> ContentScale.Crop
@@ -82,7 +81,6 @@ fun RenderContainer(data: DivComponent.Container) {
                 verticalArrangement = mapVerticalArrangement(data.contentAlignmentVertical)
             ) {
                 data.items.forEach { child ->
-                    // Handle weight for children if needed (requires scoped modifier)
                     DivRenderer(child)
                 }
             }
@@ -101,9 +99,31 @@ fun RenderContainer(data: DivComponent.Container) {
         Orientation.OVERLAP -> {
             Box(
                 modifier = modifier,
-                contentAlignment = ComposeAlignment.TopStart // Default, logic can be more complex
+                contentAlignment = ComposeAlignment.TopStart
             ) {
                 data.items.forEach { child ->
+                    DivRenderer(child)
+                }
+            }
+        }
+        Orientation.SCROLL_VERTICAL -> {
+            LazyColumn(
+                modifier = modifier,
+                horizontalAlignment = mapHorizontalAlignment(data.contentAlignmentHorizontal),
+                verticalArrangement = mapVerticalArrangement(data.contentAlignmentVertical)
+            ) {
+                items(data.items) { child ->
+                    DivRenderer(child)
+                }
+            }
+        }
+        Orientation.SCROLL_HORIZONTAL -> {
+            LazyRow(
+                modifier = modifier,
+                verticalAlignment = mapVerticalAlignment(data.contentAlignmentVertical),
+                horizontalArrangement = mapHorizontalArrangement(data.contentAlignmentHorizontal)
+            ) {
+                items(data.items) { child ->
                     DivRenderer(child)
                 }
             }

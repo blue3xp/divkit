@@ -64,30 +64,48 @@ struct DivContainerView: View {
         // We need to apply style to the container itself
         // But logic depends on orientation
 
-        switch orientation {
-        case .vertical:
-            VStack(alignment: alignment.horizontal) {
-                ForEach(items) { item in
-                    DivRenderer(component: item)
+        Group {
+            switch orientation {
+            case .vertical:
+                VStack(alignment: alignment.horizontal) {
+                    ForEach(items) { item in
+                        DivRenderer(component: item)
+                    }
                 }
-            }
-            .applyDivStyle(style)
 
-        case .horizontal:
-            HStack(alignment: alignment.vertical) {
-                ForEach(items) { item in
-                    DivRenderer(component: item)
+            case .horizontal:
+                HStack(alignment: alignment.vertical) {
+                    ForEach(items) { item in
+                        DivRenderer(component: item)
+                    }
                 }
-            }
-            .applyDivStyle(style)
 
-        case .overlap:
-            ZStack(alignment: alignment) {
-                ForEach(items) { item in
-                    DivRenderer(component: item)
+            case .overlap:
+                ZStack(alignment: alignment) {
+                    ForEach(items) { item in
+                        DivRenderer(component: item)
+                    }
+                }
+
+            case .scrollVertical:
+                ScrollView(.vertical) {
+                    VStack(alignment: alignment.horizontal) {
+                        ForEach(items) { item in
+                            DivRenderer(component: item)
+                        }
+                    }
+                }
+
+            case .scrollHorizontal:
+                ScrollView(.horizontal) {
+                    HStack(alignment: alignment.vertical) {
+                        ForEach(items) { item in
+                            DivRenderer(component: item)
+                        }
+                    }
                 }
             }
-            .applyDivStyle(style)
         }
+        .applyDivStyle(style)
     }
 }

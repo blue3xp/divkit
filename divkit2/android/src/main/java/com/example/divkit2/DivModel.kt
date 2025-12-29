@@ -18,7 +18,6 @@ object ColorSerializer : KSerializer<Long> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Color", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: Long) {
-        // Serialize back to hex string if needed, e.g., "#AARRGGBB"
         encoder.encodeString("#${String.format("%08X", value)}")
     }
 
@@ -64,7 +63,9 @@ object DpSerializer : KSerializer<Dp> {
 enum class Orientation {
     @SerialName("vertical") VERTICAL,
     @SerialName("horizontal") HORIZONTAL,
-    @SerialName("overlap") OVERLAP
+    @SerialName("overlap") OVERLAP,
+    @SerialName("scroll_vertical") SCROLL_VERTICAL,
+    @SerialName("scroll_horizontal") SCROLL_HORIZONTAL
 }
 
 @Serializable

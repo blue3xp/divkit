@@ -4,6 +4,8 @@ import SwiftUI
 
 enum DivOrientation: String, Codable {
     case vertical, horizontal, overlap
+    case scrollVertical = "scroll_vertical"
+    case scrollHorizontal = "scroll_horizontal"
 }
 
 enum DivAlignment: String, Codable {
