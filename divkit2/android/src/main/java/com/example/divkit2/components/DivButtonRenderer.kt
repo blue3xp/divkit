@@ -17,12 +17,12 @@ fun DivButtonRenderer(data: DivComponent.Button) {
     Button(
         onClick = {
             val action = data.onClickAction
-            println("Button Action: $action")
+            // Delegate to the ActionHandler chain
+            val handled = context.actionHandler.handleAction(action, context)
 
-            if (action.logId == "submit_form") {
-                val formData = context.getAllVariables()
-                println("Submitting Form Data to ${action.url}: $formData")
-                // In a real app, you would make a network request here
+            if (!handled) {
+                // Fallback / Default handling
+                println("Unhandled Button Action: $action")
             }
         },
         colors = ButtonDefaults.buttonColors(

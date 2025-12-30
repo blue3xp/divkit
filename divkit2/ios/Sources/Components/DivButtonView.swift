@@ -11,12 +11,11 @@ struct DivButtonView: View {
 
     var body: some View {
         Button(action: {
-            print("Button Action: \(action)")
+            // Delegate to the ActionHandler chain
+            let handled = context.actionHandler.handleAction(action, context: context)
 
-            if action.logId == "submit_form" {
-                let formData = context.variables
-                print("Submitting Form Data to \(String(describing: action.url)): \(formData)")
-                // In a real app, network request happens here
+            if !handled {
+                print("Unhandled Button Action: \(action)")
             }
         }) {
             Text(text)

@@ -3,7 +3,12 @@ import SwiftUI
 struct ContentView: View {
     @State private var divData: DivComponent? = nil
     @State private var isLoading = true
-    @StateObject private var divContext = DivContext()
+
+    // Initialize handlers
+    // Note: In a real app, this might be injected
+    @StateObject private var divContext = DivContext(
+        actionHandler: DivCompositeActionHandler(handlers: [DivFormActionHandler()])
+    )
 
     var body: some View {
         Group {

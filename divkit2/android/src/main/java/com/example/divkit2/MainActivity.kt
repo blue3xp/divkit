@@ -27,7 +27,11 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     val divData = remember { mutableStateOf<DivComponent?>(null) }
-                    val divContext = remember { DivContext() }
+
+                    // Initialize handlers
+                    val formHandler = remember { DivFormActionHandler() }
+                    val compositeHandler = remember { DivCompositeActionHandler(listOf(formHandler)) }
+                    val divContext = remember { DivContext(actionHandler = compositeHandler) }
 
                     // Simulate loading large/complex JSON
                     LaunchedEffect(Unit) {

@@ -4,7 +4,9 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 
-class DivContext {
+class DivContext(
+    val actionHandler: DivActionHandler = DivCompositeActionHandler(emptyList())
+) {
     private val variables = mutableMapOf<String, MutableState<String>>()
 
     fun getVariable(name: String): MutableState<String> {
