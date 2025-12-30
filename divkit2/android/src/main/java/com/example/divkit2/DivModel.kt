@@ -91,6 +91,12 @@ data class DivBorder(
 )
 
 @Serializable
+data class DivValidator(
+    val regex: String,
+    val message: String
+)
+
+@Serializable
 data class DivStyle(
     @Serializable(with = DpSerializer::class) val width: Dp = Dp.Unspecified,
     @Serializable(with = DpSerializer::class) val height: Dp = Dp.Unspecified,
@@ -126,6 +132,7 @@ sealed class DivComponent {
     data class Input(
         @SerialName("hint") val hint: String = "",
         @SerialName("variable") val variable: String,
+        val validators: List<DivValidator> = emptyList(),
         override val style: DivStyle = DivStyle()
     ) : DivComponent()
 

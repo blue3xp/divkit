@@ -24,7 +24,7 @@ struct ContentView: View {
     }
 
     private func loadJson() async {
-        // Simulate complex JSON string with FORM data
+        // Simulate complex JSON string with FORM data and VALIDATION
         let complexJson = """
         {
           "type": "container",
@@ -40,8 +40,20 @@ struct ContentView: View {
             },
             {
               "type": "input",
-              "hint": "Enter your name (iOS)",
+              "hint": "Enter your name (Required)",
               "variable": "user_name",
+              "validators": [
+                 { "regex": "^.+$", "message": "Name cannot be empty" }
+              ],
+              "style": { "margin": 8, "width": -1 }
+            },
+            {
+              "type": "input",
+              "hint": "Enter your email",
+              "variable": "user_email",
+              "validators": [
+                 { "regex": "^[A-Za-z0-9+_.-]+@(.+)$", "message": "Invalid email format" }
+              ],
               "style": { "margin": 8, "width": -1 }
             },
             {

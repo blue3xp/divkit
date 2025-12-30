@@ -49,6 +49,11 @@ struct DivBorder: Codable {
     }
 }
 
+struct DivValidator: Codable {
+    var regex: String
+    var message: String
+}
+
 struct DivStyle: Codable {
     var width: CGFloat? = nil
     var height: CGFloat? = nil
@@ -103,7 +108,7 @@ enum DivComponent: Identifiable, Codable {
     var id: UUID {
         switch self {
         case .text(let id, _, _, _, _, _): return id
-        case .input(let id, _, _, _): return id
+        case .input(let id, _, _, _, _): return id
         case .image(let id, _, _, _): return id
         case .button(let id, _, _, _, _, _): return id
         case .container(let id, _, _, _, _): return id
@@ -112,7 +117,7 @@ enum DivComponent: Identifiable, Codable {
     }
 
     case text(id: UUID = UUID(), content: String, fontSize: CGFloat, color: Color, fontWeight: Font.Weight, style: DivStyle)
-    case input(id: UUID = UUID(), hint: String, variable: String, style: DivStyle)
+    case input(id: UUID = UUID(), hint: String, variable: String, validators: [DivValidator] = [], style: DivStyle)
     case image(id: UUID = UUID(), url: URL?, contentScale: ContentMode, style: DivStyle)
     case button(id: UUID = UUID(), text: String, action: DivAction, backgroundColor: Color, textColor: Color, style: DivStyle)
     case container(id: UUID = UUID(), items: [DivComponent], orientation: DivOrientation, alignment: Alignment, style: DivStyle)
@@ -123,7 +128,7 @@ enum DivComponent: Identifiable, Codable {
         // Text
         case text, fontSize = "font_size", textColor = "text_color", fontWeight = "font_weight"
         // Input
-        case hint, variable
+        case hint, variable, validators
         // Image
         case url, scale
         // Button
@@ -155,7 +160,8 @@ enum DivComponent: Identifiable, Codable {
         case "input":
             let hint = try container.decodeIfPresent(String.self, forKey: .hint) ?? ""
             let variable = try container.decode(String.self, forKey: .variable)
-            self = .input(id: id, hint: hint, variable: variable, style: style)
+            let validators = try container.decodeIfPresent([DivValidator].self, forKey: .validators) ?? []
+            self = .input(id: id, hint: hint, variable: variable, validators: validators, style: style)
 
         case "image":
             let urlStr = try container.decodeIfPresent(String.self, forKey: .url)
@@ -231,7 +237,7 @@ extension Color {
         case 3: // RGB (12-bit)
             (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
         case 6: // RGB (24-bit)
-            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int >> 8 & 0xFF)
         case 8: // ARGB (32-bit)
             (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
         default:
