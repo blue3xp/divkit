@@ -3,6 +3,8 @@ package com.example.divkit2.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -16,6 +18,7 @@ import com.example.divkit2.DivRenderer
 import com.example.divkit2.Orientation
 import com.example.divkit2.applyDivStyle
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DivContainerRenderer(data: DivComponent.Container) {
     val modifier = Modifier.applyDivStyle(data.style)
@@ -37,6 +40,18 @@ fun DivContainerRenderer(data: DivComponent.Container) {
                 modifier = modifier,
                 verticalAlignment = mapVerticalAlignment(data.contentAlignmentVertical),
                 horizontalArrangement = mapHorizontalArrangement(data.contentAlignmentHorizontal)
+            ) {
+                data.items.forEach { child ->
+                    DivRenderer(child)
+                }
+            }
+        }
+        Orientation.WRAP -> {
+            // Uses FlowRow for flex-like wrap behavior. Defaulting to horizontal flow that wraps.
+            FlowRow(
+                modifier = modifier,
+                horizontalArrangement = mapHorizontalArrangement(data.contentAlignmentHorizontal),
+                verticalArrangement = mapVerticalArrangement(data.contentAlignmentVertical)
             ) {
                 data.items.forEach { child ->
                     DivRenderer(child)

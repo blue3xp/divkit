@@ -65,7 +65,8 @@ enum class Orientation {
     @SerialName("horizontal") HORIZONTAL,
     @SerialName("overlap") OVERLAP,
     @SerialName("scroll_vertical") SCROLL_VERTICAL,
-    @SerialName("scroll_horizontal") SCROLL_HORIZONTAL
+    @SerialName("scroll_horizontal") SCROLL_HORIZONTAL,
+    @SerialName("wrap") WRAP
 }
 
 @Serializable

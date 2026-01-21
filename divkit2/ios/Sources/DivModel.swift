@@ -3,7 +3,7 @@ import SwiftUI
 // --- Base Models ---
 
 enum DivOrientation: String, Codable {
-    case vertical, horizontal, overlap
+    case vertical, horizontal, overlap, wrap
     case scrollVertical = "scroll_vertical"
     case scrollHorizontal = "scroll_horizontal"
 }

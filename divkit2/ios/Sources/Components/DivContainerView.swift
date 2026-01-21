@@ -23,6 +23,13 @@ struct DivContainerView: View {
                     }
                 }
 
+            case .wrap:
+                FlowLayout() {
+                    ForEach(items) { item in
+                        DivRenderer(component: item)
+                    }
+                }
+
             case .overlap:
                 ZStack(alignment: alignment) {
                     ForEach(items) { item in
