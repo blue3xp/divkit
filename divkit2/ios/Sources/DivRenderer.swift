@@ -22,6 +22,9 @@ struct DivRenderer: View {
 
         case .grid(_, let items, let columnCount, let style):
             DivGridView(items: items, columnCount: columnCount, style: style)
+
+        case .custom(_, let message, let plugin, let style):
+            DivCustomView(message: message, plugin: plugin, style: style)
         }
     }
 }

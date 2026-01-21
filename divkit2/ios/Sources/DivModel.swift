@@ -101,6 +101,24 @@ struct DivStyle: Decodable {
     }
 }
 
+struct DivTemplate: Decodable {
+    let message: String
+    let plugin: String
+}
+
+struct DivRoot: Decodable {
+    let templates: [String: DivTemplate]?
+    let card: DivComponent
+
+    // We need custom decoding to pass templates context during decoding OR resolve after
+    // Since 'DivComponent' is recursive, resolving after is easier to implement without
+    // complex Decoder UserInfo passing logic in Swift.
+
+    func resolve() -> DivComponent {
+        return card.resolve(templates: templates ?? [:])
+    }
+}
+
 // --- Component Hierarchy ---
 
 enum DivComponent: Identifiable, Decodable {
@@ -113,6 +131,7 @@ enum DivComponent: Identifiable, Decodable {
         case .button(let id, _, _, _, _, _): return id
         case .container(let id, _, _, _, _): return id
         case .grid(let id, _, _, _): return id
+        case .custom(let id, _, _, _): return id
         }
     }
 
@@ -122,6 +141,7 @@ enum DivComponent: Identifiable, Decodable {
     case button(id: UUID = UUID(), text: String, action: DivAction, backgroundColor: Color, textColor: Color, style: DivStyle)
     case container(id: UUID = UUID(), items: [DivComponent], orientation: DivOrientation, alignment: Alignment, style: DivStyle)
     case grid(id: UUID = UUID(), items: [DivComponent], columnCount: Int, style: DivStyle)
+    case custom(id: UUID = UUID(), message: String, plugin: String, style: DivStyle)
 
     enum CodingKeys: String, CodingKey {
         case type, style
@@ -137,6 +157,22 @@ enum DivComponent: Identifiable, Decodable {
         case items, orientation, alignmentHorizontal = "alignment_horizontal", alignmentVertical = "alignment_vertical"
         // Grid
         case columnCount = "column_count"
+    }
+
+    // Helper enum for decoding mixed array
+    private enum ItemWrapper: Decodable {
+        case component(DivComponent)
+        case reference(String)
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            if let stringVal = try? container.decode(String.self) {
+                self = .reference(stringVal)
+            } else {
+                let component = try container.decode(DivComponent.self)
+                self = .component(component)
+            }
+        }
     }
 
     init(from decoder: Decoder) throws {
@@ -184,25 +220,74 @@ enum DivComponent: Identifiable, Decodable {
             self = .button(id: id, text: text, action: action, backgroundColor: bg, textColor: txt, style: style)
 
         case "container":
-            let items = try container.decode([DivComponent].self, forKey: .items)
-            let orientation = try container.decodeIfPresent(DivOrientation.self, forKey: .orientation) ?? .vertical
+            // Use ItemWrapper to handle [String or Object]
+            let itemWrappers = try container.decode([ItemWrapper].self, forKey: .items)
 
-            // Map separate alignment keys to SwiftUI Alignment
+            // Temporary mapping: treat references as placeholder text until resolved
+            // The actual resolution happens in `resolve(templates:)`
+            let items = itemWrappers.map { wrapper -> DivComponent in
+                switch wrapper {
+                case .component(let c): return c
+                case .reference(let ref):
+                    // Store reference as a special text or handle it?
+                    // Best way: Use a special .custom placeholder
+                    return .custom(id: UUID(), message: "__REF__:\(ref)", plugin: "", style: DivStyle())
+                }
+            }
+
+            let orientation = try container.decodeIfPresent(DivOrientation.self, forKey: .orientation) ?? .vertical
             let hAlign = try container.decodeIfPresent(DivAlignment.self, forKey: .alignmentHorizontal) ?? .start
             let vAlign = try container.decodeIfPresent(DivAlignment.self, forKey: .alignmentVertical) ?? .top
-
-            let alignment: Alignment = Self.mapAlignment(h: hAlign, v: vAlign)
+            let alignment = Self.mapAlignment(h: hAlign, v: vAlign)
 
             self = .container(id: id, items: items, orientation: orientation, alignment: alignment, style: style)
 
         case "grid":
-            let items = try container.decode([DivComponent].self, forKey: .items)
+            let itemWrappers = try container.decode([ItemWrapper].self, forKey: .items)
+            let items = itemWrappers.map { wrapper -> DivComponent in
+                switch wrapper {
+                case .component(let c): return c
+                case .reference(let ref):
+                    return .custom(id: UUID(), message: "__REF__:\(ref)", plugin: "", style: DivStyle())
+                }
+            }
             let columnCount = try container.decodeIfPresent(Int.self, forKey: .columnCount) ?? 2
             self = .grid(id: id, items: items, columnCount: columnCount, style: style)
 
         default:
-            // Fallback for unknown types
             self = .text(id: id, content: "Unknown type: \(type)", fontSize: 14, color: .red, fontWeight: .regular, style: style)
+        }
+    }
+
+    // Post-decoding resolution pass
+    func resolve(templates: [String: DivTemplate]) -> DivComponent {
+        switch self {
+        case .container(let id, let items, let orient, let align, let style):
+            let resolvedItems = items.map { item -> DivComponent in
+                if case .custom(_, let msg, _, _) = item, msg.hasPrefix("__REF__:") {
+                    let refName = String(msg.dropFirst(8))
+                    if let template = templates[refName] {
+                        return .custom(id: UUID(), message: template.message, plugin: template.plugin, style: DivStyle())
+                    }
+                }
+                return item.resolve(templates: templates)
+            }
+            return .container(id: id, items: resolvedItems, orientation: orient, alignment: align, style: style)
+
+        case .grid(let id, let items, let cols, let style):
+            let resolvedItems = items.map { item -> DivComponent in
+                if case .custom(_, let msg, _, _) = item, msg.hasPrefix("__REF__:") {
+                    let refName = String(msg.dropFirst(8))
+                    if let template = templates[refName] {
+                        return .custom(id: UUID(), message: template.message, plugin: template.plugin, style: DivStyle())
+                    }
+                }
+                return item.resolve(templates: templates)
+            }
+            return .grid(id: id, items: resolvedItems, columnCount: cols, style: style)
+
+        default:
+            return self
         }
     }
 

@@ -3,6 +3,7 @@ package com.example.divkit2
 import androidx.compose.runtime.Composable
 import com.example.divkit2.components.DivButtonRenderer
 import com.example.divkit2.components.DivContainerRenderer
+import com.example.divkit2.components.DivCustomRenderer
 import com.example.divkit2.components.DivGridRenderer
 import com.example.divkit2.components.DivImageRenderer
 import com.example.divkit2.components.DivInputRenderer
@@ -17,5 +18,6 @@ fun DivRenderer(component: DivComponent) {
         is DivComponent.Button -> DivButtonRenderer(component)
         is DivComponent.Container -> DivContainerRenderer(component)
         is DivComponent.Grid -> DivGridRenderer(component)
+        is DivComponent.Custom -> DivCustomRenderer(component)
     }
 }

@@ -32,77 +32,77 @@ struct ContentView: View {
         // Simulate complex JSON string with FORM data and VALIDATION
         let complexJson = """
         {
-          "type": "container",
-          "style": { "padding": 16 },
-          "orientation": "vertical",
-          "items": [
-            {
-              "type": "text",
-              "text": "Parsed from JSON (Async Task)",
-              "font_size": 24,
-              "font_weight": "bold",
-              "style": { "margin": 8 }
+            "templates": {
+                "tutorialCard": {
+                    "message":"getTutorialCard",
+                    "plugin":"homehub"
+                }
             },
-            {
-              "type": "text",
-              "text": "Flex Wrap Layout Example:",
-              "font_size": 18,
-              "font_weight": "bold",
-              "style": { "margin": 8, "padding": 0 }
-            },
-            {
+            "card": {
               "type": "container",
-              "orientation": "wrap",
-              "style": {
-                  "background": "#FFEEEEEE",
-                  "padding": 8,
-                  "margin": 8,
-                  "border": { "color": "#FFCCCCCC", "width": 1, "radius": 8 }
-              },
-              "items": [
-                { "type": "text", "text": "Tag 1", "style": { "background": "#FFBBDEFB", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
-                { "type": "text", "text": "Long Tag Number 2", "style": { "background": "#FFC8E6C9", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
-                { "type": "text", "text": "Tag 3", "style": { "background": "#FFFFECB3", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
-                { "type": "text", "text": "Another Tag 4", "style": { "background": "#FFE1BEE7", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
-                { "type": "text", "text": "Tag 5", "style": { "background": "#FFFFCCBC", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
-                { "type": "text", "text": "Tag 6", "style": { "background": "#FFCFD8DC", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
-                { "type": "text", "text": "Very Very Long Tag 7", "style": { "background": "#FFF0F4C3", "padding": 8, "margin": 4, "border": { "radius": 16 } } }
-              ]
-            },
-            {
-              "type": "input",
-              "hint": "Enter your name (Required)",
-              "variable": "user_name",
-              "validators": [
-                 { "regex": "^.+$", "message": "Name cannot be empty" }
-              ],
-              "style": { "margin": 8, "width": -1 }
-            },
-            {
-              "type": "input",
-              "hint": "Enter your email",
-              "variable": "user_email",
-              "validators": [
-                 { "regex": "^[A-Za-z0-9+_.-]+@(.+)$", "message": "Invalid email format" }
-              ],
-              "style": { "margin": 8, "width": -1 }
-            },
-            {
-              "type": "container",
-              "orientation": "horizontal",
-              "style": { "margin": 16 },
+              "style": { "padding": 16 },
+              "orientation": "vertical",
               "items": [
                 {
-                  "type": "button",
-                  "text": "Submit Form",
-                  "action": { "log_id": "submit_form", "url": "https://example.com/api/submit" },
-                  "background_color": "#FF2196F3",
-                  "text_color": "#FFFFFFFF",
-                  "style": { "margin": 4 }
+                  "type": "text",
+                  "text": "Parsed from JSON (Templates)",
+                  "font_size": 24,
+                  "font_weight": "bold",
+                  "style": { "margin": 8 }
+                },
+                "tutorialCard",
+                {
+                  "type": "text",
+                  "text": "Flex Wrap Layout Example:",
+                  "font_size": 18,
+                  "font_weight": "bold",
+                  "style": { "margin": 8, "padding": 0 }
+                },
+                {
+                  "type": "container",
+                  "orientation": "wrap",
+                  "style": {
+                      "background": "#FFEEEEEE",
+                      "padding": 8,
+                      "margin": 8,
+                      "border": { "color": "#FFCCCCCC", "width": 1, "radius": 8 }
+                  },
+                  "items": [
+                    { "type": "text", "text": "Tag 1", "style": { "background": "#FFBBDEFB", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
+                    { "type": "text", "text": "Long Tag Number 2", "style": { "background": "#FFC8E6C9", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
+                    { "type": "text", "text": "Tag 3", "style": { "background": "#FFFFECB3", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
+                    { "type": "text", "text": "Another Tag 4", "style": { "background": "#FFE1BEE7", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
+                    { "type": "text", "text": "Tag 5", "style": { "background": "#FFFFCCBC", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
+                    { "type": "text", "text": "Tag 6", "style": { "background": "#FFCFD8DC", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
+                    { "type": "text", "text": "Very Very Long Tag 7", "style": { "background": "#FFF0F4C3", "padding": 8, "margin": 4, "border": { "radius": 16 } } }
+                  ]
+                },
+                {
+                  "type": "input",
+                  "hint": "Enter your name (Required)",
+                  "variable": "user_name",
+                  "validators": [
+                     { "regex": "^.+$", "message": "Name cannot be empty" }
+                  ],
+                  "style": { "margin": 8, "width": -1 }
+                },
+                {
+                  "type": "container",
+                  "orientation": "horizontal",
+                  "style": { "margin": 16 },
+                  "items": [
+                    {
+                      "type": "button",
+                      "text": "Submit Form",
+                      "action": { "log_id": "submit_form", "url": "https://example.com/api/submit" },
+                      "background_color": "#FF2196F3",
+                      "text_color": "#FFFFFFFF",
+                      "style": { "margin": 4 }
+                    }
+                  ]
                 }
               ]
             }
-          ]
         }
         """
 
@@ -112,7 +112,8 @@ struct ContentView: View {
             guard let data = complexJson.data(using: .utf8) else { return nil }
             do {
                 // This is where Codable magic happens
-                return try JSONDecoder().decode(DivComponent.self, from: data)
+                let root = try JSONDecoder().decode(DivRoot.self, from: data)
+                return root.resolve()
             } catch {
                 print("JSON Parsing Error: \(error)")
                 return nil
