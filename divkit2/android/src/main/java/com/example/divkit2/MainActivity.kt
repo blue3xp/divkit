@@ -51,6 +51,32 @@ class MainActivity : ComponentActivity() {
                                       "style": { "margin": 8 }
                                     },
                                     {
+                                      "type": "text",
+                                      "text": "Flex Wrap Layout Example:",
+                                      "font_size": 18,
+                                      "font_weight": "bold",
+                                      "style": { "margin": 8, "padding": 0 }
+                                    },
+                                    {
+                                      "type": "container",
+                                      "orientation": "wrap",
+                                      "style": {
+                                          "background": "#FFEEEEEE",
+                                          "padding": 8,
+                                          "margin": 8,
+                                          "border": { "color": "#FFCCCCCC", "width": 1, "radius": 8 }
+                                      },
+                                      "items": [
+                                        { "type": "text", "text": "Tag 1", "style": { "background": "#FFBBDEFB", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
+                                        { "type": "text", "text": "Long Tag Number 2", "style": { "background": "#FFC8E6C9", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
+                                        { "type": "text", "text": "Tag 3", "style": { "background": "#FFFFECB3", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
+                                        { "type": "text", "text": "Another Tag 4", "style": { "background": "#FFE1BEE7", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
+                                        { "type": "text", "text": "Tag 5", "style": { "background": "#FFFFCCBC", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
+                                        { "type": "text", "text": "Tag 6", "style": { "background": "#FFCFD8DC", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
+                                        { "type": "text", "text": "Very Very Long Tag 7", "style": { "background": "#FFF0F4C3", "padding": 8, "margin": 4, "border": { "radius": 16 } } }
+                                      ]
+                                    },
+                                    {
                                       "type": "input",
                                       "hint": "Enter your name (Required)",
                                       "variable": "user_name",

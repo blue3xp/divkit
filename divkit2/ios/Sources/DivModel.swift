@@ -2,17 +2,17 @@ import SwiftUI
 
 // --- Base Models ---
 
-enum DivOrientation: String, Codable {
+enum DivOrientation: String, Decodable {
     case vertical, horizontal, overlap, wrap
     case scrollVertical = "scroll_vertical"
     case scrollHorizontal = "scroll_horizontal"
 }
 
-enum DivAlignment: String, Codable {
+enum DivAlignment: String, Decodable {
     case start, center, end, top, bottom
 }
 
-struct DivAction: Codable {
+struct DivAction: Decodable {
     var url: URL? = nil
     var logId: String? = nil
 
@@ -22,7 +22,7 @@ struct DivAction: Codable {
     }
 }
 
-struct DivBorder: Codable {
+struct DivBorder: Decodable {
     var color: Color = .black
     var width: CGFloat = 0
     var cornerRadius: CGFloat = 0
@@ -49,12 +49,12 @@ struct DivBorder: Codable {
     }
 }
 
-struct DivValidator: Codable {
+struct DivValidator: Decodable {
     var regex: String
     var message: String
 }
 
-struct DivStyle: Codable {
+struct DivStyle: Decodable {
     var width: CGFloat? = nil
     var height: CGFloat? = nil
     var background: Color? = nil
@@ -103,7 +103,7 @@ struct DivStyle: Codable {
 
 // --- Component Hierarchy ---
 
-enum DivComponent: Identifiable, Codable {
+enum DivComponent: Identifiable, Decodable {
     // Computed property to access the stable ID stored in the cases
     var id: UUID {
         switch self {
@@ -206,10 +206,6 @@ enum DivComponent: Identifiable, Codable {
         }
     }
 
-    func encode(to encoder: Encoder) throws {
-        // Encoding logic not required for this task
-    }
-
     static func mapAlignment(h: DivAlignment, v: DivAlignment) -> Alignment {
         switch (h, v) {
         case (.center, .center): return .center
@@ -237,7 +233,7 @@ extension Color {
         case 3: // RGB (12-bit)
             (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
         case 6: // RGB (24-bit)
-            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int >> 8 & 0xFF)
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
         case 8: // ARGB (32-bit)
             (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
         default:
