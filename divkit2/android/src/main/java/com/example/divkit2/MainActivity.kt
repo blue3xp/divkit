@@ -1,0 +1,139 @@
+package com.example.divkit2
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            MaterialTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colors.background
+                ) {
+                    val divData = remember { mutableStateOf<DivComponent?>(null) }
+
+                    // Initialize handlers
+                    val formHandler = remember { DivFormActionHandler() }
+                    val compositeHandler = remember { DivCompositeActionHandler(listOf(formHandler)) }
+                    val divContext = remember { DivContext(actionHandler = compositeHandler) }
+
+                    // Simulate loading large/complex JSON
+                    LaunchedEffect(Unit) {
+                        withContext(Dispatchers.IO) {
+                            // In a real app, this would come from a file or network
+                            val complexJson = """
+                                {
+                                    "templates": {
+                                        "tutorialCard": {
+                                            "message":"getTutorialCard",
+                                            "plugin":"homehub"
+                                        }
+                                    },
+                                    "card": {
+                                      "type": "container",
+                                      "style": { "padding": 16 },
+                                      "orientation": "vertical",
+                                      "items": [
+                                        {
+                                          "type": "text",
+                                          "text": "Parsed from JSON (Templates)",
+                                          "font_size": 24,
+                                          "font_weight": "bold",
+                                          "style": { "margin": 8 }
+                                        },
+                                        "tutorialCard",
+                                        {
+                                          "type": "text",
+                                          "text": "Flex Wrap Layout Example:",
+                                          "font_size": 18,
+                                          "font_weight": "bold",
+                                          "style": { "margin": 8, "padding": 0 }
+                                        },
+                                        {
+                                          "type": "container",
+                                          "orientation": "wrap",
+                                          "style": {
+                                              "background": "#FFEEEEEE",
+                                              "padding": 8,
+                                              "margin": 8,
+                                              "border": { "color": "#FFCCCCCC", "width": 1, "radius": 8 }
+                                          },
+                                          "items": [
+                                            { "type": "text", "text": "Tag 1", "style": { "background": "#FFBBDEFB", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
+                                            { "type": "text", "text": "Long Tag Number 2", "style": { "background": "#FFC8E6C9", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
+                                            { "type": "text", "text": "Tag 3", "style": { "background": "#FFFFECB3", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
+                                            { "type": "text", "text": "Another Tag 4", "style": { "background": "#FFE1BEE7", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
+                                            { "type": "text", "text": "Tag 5", "style": { "background": "#FFFFCCBC", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
+                                            { "type": "text", "text": "Tag 6", "style": { "background": "#FFCFD8DC", "padding": 8, "margin": 4, "border": { "radius": 16 } } },
+                                            { "type": "text", "text": "Very Very Long Tag 7", "style": { "background": "#FFF0F4C3", "padding": 8, "margin": 4, "border": { "radius": 16 } } }
+                                          ]
+                                        },
+                                        {
+                                          "type": "input",
+                                          "hint": "Enter your name (Required)",
+                                          "variable": "user_name",
+                                          "validators": [
+                                            { "regex": "^.+$", "message": "Name cannot be empty" }
+                                          ],
+                                          "style": { "margin": 8, "width": -1 }
+                                        },
+                                        {
+                                          "type": "container",
+                                          "orientation": "horizontal",
+                                          "style": { "margin": 16 },
+                                          "items": [
+                                            {
+                                              "type": "button",
+                                              "text": "Submit Form",
+                                              "action": { "log_id": "submit_form", "url": "https://example.com/api/submit" },
+                                              "background_color": "#FF2196F3",
+                                              "text_color": "#FFFFFFFF",
+                                              "style": { "margin": 4 }
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                }
+                            """.trimIndent()
+
+                            // Parse off-thread
+                            val parsed = DivJsonParser.parse(complexJson)
+
+                            // Simulate network delay to show loading state
+                            kotlinx.coroutines.delay(1000)
+
+                            divData.value = parsed
+                        }
+                    }
+
+                    if (divData.value == null) {
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                            CircularProgressIndicator()
+                        }
+                    } else {
+                        CompositionLocalProvider(LocalDivContext provides divContext) {
+                            DivRenderer(component = divData.value!!)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
